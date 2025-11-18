@@ -17,7 +17,7 @@ Simple Spring Boot service demonstrating clean controller → service → reposi
 ### Run locally
 ```bash
 cd student-management
-mvn spring-boot:run
+./mvnw spring-boot:run
 ```
 The API exposes Swagger UI via Springdoc at `http://localhost:8080/swagger-ui.html`. H2 console is at `http://localhost:8080/h2-console` (JDBC URL `jdbc:h2:mem:studentdb`).
 

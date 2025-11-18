@@ -1,0 +1,23 @@
+#!/bin/sh
+set -euo pipefail
+WRAPPER_DIR="$(cd "$(dirname "$0")" && pwd)/.mvn/wrapper"
+JAR="$WRAPPER_DIR/maven-wrapper.jar"
+PROPS="$WRAPPER_DIR/maven-wrapper.properties"
+
+if [ ! -f "$JAR" ]; then
+  echo "Maven wrapper JAR missing: $JAR" >&2
+  exit 1
+fi
+
+JAVA_CMD="${JAVA_HOME:-}/bin/java"
+if [ ! -x "$JAVA_CMD" ]; then
+  JAVA_CMD=$(command -v java || true)
+fi
+if [ -z "$JAVA_CMD" ]; then
+  echo "Java not found. Please install JDK 17+." >&2
+  exit 1
+fi
+
+exec "$JAVA_CMD" \
+  -Dmaven.multiModuleProjectDirectory="$(pwd)" \
+  -cp "$JAR" org.apache.maven.wrapper.MavenWrapperMain "$@"
