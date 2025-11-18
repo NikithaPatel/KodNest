@@ -51,17 +51,19 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<Page<StudentResponseDto>> listStudents(@RequestParam(required = false) String branch,
                                                                  @RequestParam(required = false) Integer yop,
+                                                                 @RequestParam(required = false) Integer startYop,
+                                                                 @RequestParam(required = false) Integer endYop,
                                                                  @RequestParam(required = false) Boolean active,
                                                                  @RequestParam(defaultValue = "0") int page,
                                                                  @RequestParam(defaultValue = "20") int size,
                                                                  @RequestParam(required = false, name = "sort") String sortParam) {
         String[] sortParts = parseSort(sortParam);
-        Integer startYop = yop;
-        Integer endYop = yop;
+        Integer effectiveStart = startYop != null ? startYop : yop;
+        Integer effectiveEnd = endYop != null ? endYop : yop;
         Page<StudentResponseDto> students = studentService.listStudents(branch,
             active,
-            startYop,
-            endYop,
+            effectiveStart,
+            effectiveEnd,
             page,
             size,
             sortParts[0],
