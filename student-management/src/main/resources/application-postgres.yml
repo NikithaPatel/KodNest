@@ -1,0 +1,22 @@
+# Rename this file to application.yml or set SPRING_PROFILES_ACTIVE=postgres
+# to enable the Postgres profile. All properties below are commented out so
+# you can adjust and uncomment them when ready.
+
+#spring:
+#  config:
+#    activate:
+#      on-profile: postgres
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/studentdb
+#    username: student_user
+#    password: change-me
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.PostgreSQLDialect
+#  sql:
+#    init:
+#      platform: postgres
