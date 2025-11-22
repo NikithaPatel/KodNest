@@ -4,7 +4,8 @@ Simple Spring Boot service demonstrating clean controller → service → reposi
 
 ## Stack
 - Java 17
-- Spring Boot 3.3.x (Web, Validation, Data JPA)
+- Spring Boot 3.3.x (Web, Validation, Data JPA, Security)
+- Spring Security with JWT authentication
 - H2 in-memory database for dev (Postgres profile template provided)
 - Maven build
 
@@ -25,8 +26,27 @@ The API exposes Swagger UI via Springdoc at `http://localhost:8080/swagger-ui.ht
 - `dev` (default): uses H2 in-memory database with `ddl-auto=update`.
 - `postgres`: sample configuration available in `src/main/resources/application-postgres.yml` (commented). Rename/copy the file or set `SPRING_PROFILES_ACTIVE=postgres` and include a Postgres driver dependency.
 
+## Authentication
+
+All `/api/students` endpoints require authentication. Users must sign up or sign in to obtain a JWT token.
+
+### Authentication Endpoints
+
+| Method | Path | Description |
+| --- | --- | --- |
+| POST | `/api/auth/signup` | Register a new user account |
+| POST | `/api/auth/signin` | Sign in with email and password to get JWT token |
+
+### Using JWT Tokens
+
+After signing up or signing in, you'll receive a JWT token in the response. Include this token in all requests to protected endpoints:
+
+```
+Authorization: Bearer <your-jwt-token>
+```
+
 ## API Summary
-Base path: `/api/students`
+Base path: `/api/students` (requires authentication)
 
 | Method | Path | Description |
 | --- | --- | --- |
@@ -47,10 +67,47 @@ Base path: `/api/students`
 
 ## Sample Requests
 
+### Authentication
+
+Sign up (create account):
+```bash
+curl -X POST http://localhost:8080/api/auth/signup \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123"
+  }'
+```
+
+Sign in (get JWT token):
+```bash
+curl -X POST http://localhost:8080/api/auth/signin \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "user@example.com",
+    "password": "password123"
+  }'
+```
+
+Response will contain:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "type": "Bearer",
+  "email": "user@example.com"
+}
+```
+
+Save the `token` value and use it in subsequent requests.
+
+### Student CRUD (requires authentication)
+
 Create student:
 ```bash
+TOKEN="<your-jwt-token>"
 curl -X POST http://localhost:8080/api/students \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{
     "fullName": "Ada Lovelace",
     "email": "ada@example.com",
@@ -64,13 +121,17 @@ curl -X POST http://localhost:8080/api/students \
 
 List students filtered by branch and year range:
 ```bash
-curl 'http://localhost:8080/api/students?branch=CSE&startYop=2018&endYop=2024&page=0&size=10&sort=fullName,asc'
+TOKEN="<your-jwt-token>"
+curl 'http://localhost:8080/api/students?branch=CSE&startYop=2018&endYop=2024&page=0&size=10&sort=fullName,asc' \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 Update student:
 ```bash
+TOKEN="<your-jwt-token>"
 curl -X PUT http://localhost:8080/api/students/1 \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{
     "fullName": "Ada Byron",
     "email": "ada.byron@example.com",
@@ -84,7 +145,9 @@ curl -X PUT http://localhost:8080/api/students/1 \
 
 Soft delete student:
 ```bash
-curl -X DELETE http://localhost:8080/api/students/1
+TOKEN="<your-jwt-token>"
+curl -X DELETE http://localhost:8080/api/students/1 \
+  -H "Authorization: Bearer $TOKEN"
 ```
 
 ## Validation & Error Handling
@@ -96,7 +159,9 @@ curl -X DELETE http://localhost:8080/api/students/1
 - Phone numbers are digits with optional leading `+` and length 7–15.
 - `yop` range validation (1900–2100) is sufficient for demo.
 - Soft delete preferred to allow recovery/history; `deleted=true` rows stay in DB but excluded from normal queries.
-- Security/authentication is out of scope for this assignment.
+- JWT tokens expire after 24 hours (86400000 ms) by default; can be configured in `application.yml`.
+- Password minimum length is 6 characters.
+- All user accounts are created with `USER` role by default.
 
 ## Postman Collection
 Not included, but requests above can be imported easily. Let me know if a collection is required.

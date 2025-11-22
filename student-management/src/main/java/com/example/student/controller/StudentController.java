@@ -80,7 +80,7 @@ public class StudentController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<StudentResponseDto> patchStudent(@PathVariable Long id,
-                                                           @Valid @RequestBody StudentRequestDto requestDto) {
+                                                           @RequestBody StudentRequestDto requestDto) {
         StudentResponseDto updated = studentService.patchStudent(id, requestDto);
         return ResponseEntity.ok(updated);
     }
